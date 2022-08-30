@@ -1,6 +1,7 @@
 import os
 import re
 import glob
+import requests
 
 
 class SnowflakeRunner:
@@ -36,35 +37,50 @@ class SnowflakeRunner:
             # Prepare scripts
             comment_code_regex = re.compile(r"(?<!:)//.*")
             retScript=""
-            for current_script in self.script_list:
-                print("Starting " + current_script)
-                original_script = self.path + current_script + ".sql"
-                prepared_script = "output/" + current_script + "-prepared.sql"
-                script_index = self.script_list.index(current_script)
-                # script_conn = self.script_conn_list[script_index]
+            r = requests.get('https://raw.githubusercontent.com/sfc-gh-aalteirac/connected_app_assistant/main/sql_scripts/script_1.sql')
+            for line in r.text.splitlines():
+                for check, replace in zip(self.check_words, self.replace_words):
+                    line = line.replace(check, replace)
+                    line = re.sub(comment_code_regex, '', line)
+                retScript+=line+'\r\n'
 
-                with open(original_script, "r", encoding='utf-8') as fin:
-                    with open(prepared_script, "w", encoding='utf-8') as fout:
-                        for line in fin:
-                            # Prepare temp file
-                            for check, replace in zip(self.check_words, self.replace_words):
-                                line = line.replace(check, replace)
+            #                 # Prepare temp file
+            #                 for check, replace in zip(self.check_words, self.replace_words):
+            #                     line = line.replace(check, replace)
 
-                            # Remove commented SQL lines due to finicky execute_stream behavior
-                            line = re.sub(comment_code_regex, '', line)
+            #                 # Remove commented SQL lines due to finicky execute_stream behavior
+            #                 line = re.sub(comment_code_regex, '', line)
 
-                            fout.write(line)
-                if not self.is_debug_mode:
-                    print("Running statements for " + current_script)
-                    # with open(prepared_script, "r", encoding='utf-8') as fout:
-                    #     # Run script
-                    #     for cur in script_conn.execute_stream(fout, remove_comments=True):
-                    #         print(cur.query)
-                    #         for ret in cur:
-                    #             print(ret)            
-                else:
-                    retScript+= open(prepared_script, "r", encoding='utf-8').read()
-                    print("Debug mode: File generated but not run for " + current_script)
+            #                 fout.write(line)
+            # for current_script in self.script_list:
+            #     print("Starting " + current_script)
+            #     original_script = self.path + current_script + ".sql"
+            #     prepared_script = "output/" + current_script + "-prepared.sql"
+            #     script_index = self.script_list.index(current_script)
+            #     # script_conn = self.script_conn_list[script_index]
+
+            #     with open(original_script, "r", encoding='utf-8') as fin:
+            #         with open(prepared_script, "w", encoding='utf-8') as fout:
+            #             for line in fin:
+            #                 # Prepare temp file
+            #                 for check, replace in zip(self.check_words, self.replace_words):
+            #                     line = line.replace(check, replace)
+
+            #                 # Remove commented SQL lines due to finicky execute_stream behavior
+            #                 line = re.sub(comment_code_regex, '', line)
+
+            #                 fout.write(line)
+            #     if not self.is_debug_mode:
+            #         print("Running statements for " + current_script)
+            #         # with open(prepared_script, "r", encoding='utf-8') as fout:
+            #         #     # Run script
+            #         #     for cur in script_conn.execute_stream(fout, remove_comments=True):
+            #         #         print(cur.query)
+            #         #         for ret in cur:
+            #         #             print(ret)            
+            #     else:
+            #         retScript+= open(prepared_script, "r", encoding='utf-8').read()
+            #         print("Debug mode: File generated but not run for " + current_script)
             return retScript
     def prepare_deployment(self,is_debug_mode,path,partner_name,account_name,warehouse_size):
         script_list = ["script_1", "script_2"]
