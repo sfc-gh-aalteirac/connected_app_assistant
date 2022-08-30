@@ -67,13 +67,14 @@ if action == "First Installation":
     # Form for initial deployment
     st.subheader("First Installation")
     with st.form("initial_deployment_form"):
-        partner_name = st.text_input("Partner Name")
-        account_name = st.text_input("Target Account ID")
+        partner_name = st.text_input("Partner Name",value="ALTEIRAC_INC",disabled=True)
+        account_name = st.text_input("Target Account ID",value="KL98766")
         # db_name = st.text_input("Database Name")
         # schema_name = st.text_input("Schema Name")
         # warehouse_name = st.text_input("Warehouse Name")
         warehouse_size = st.selectbox("Warehouse Size?",
                                    ["XS", "S", "Medium","Large","X-Large", "2X-Large","3X-Large","4X-Large"])  # , "ID Resolution Native App"])
+        script_path=st.selectbox("Script Template",["https://raw.githubusercontent.com/sfc-gh-aalteirac/connected_app_assistant/main/sql_scripts/script_1.sql"])
         # role_name = st.text_input("Role Name")  
         # user_name = st.text_input("User Name")  
 
@@ -94,7 +95,7 @@ if action == "First Installation":
             path = os.getcwd() + "/sql_scripts/"
             
             with st.spinner("Deploying Clean Room..."):
-                snowRunner.prepare_deployment(is_debug_mode,path,partner_name,account_name,warehouse_size)
+                snowRunner.prepare_deployment(is_debug_mode,path,partner_name,account_name,warehouse_size,script_path)
                 retScript=snowRunner.execute_locally()
 
             # Message dependent on debug or not
@@ -108,59 +109,59 @@ if action == "First Installation":
 elif action == "Maintenance":
     # Form for adding consumers
     st.subheader("Maintenance")
-    with st.form("additional_consumer_form"):
-        warehouse_size = st.selectbox("Which version does the Provider have installed?",
-                                   ["6.0 Native App", "5.5 Jinja", "5.5 SQL Param"])
-        abbreviation = st.text_input("What database abbreviation does the Provider have? (Leave blank for default)")
-        provider_nickname = st.selectbox("Which is the existing Provider account?",
-                                         st.session_state['account_nicknames'])
-        consumer_nickname = st.selectbox("Which is the new Consumer account?", st.session_state['account_nicknames'])
-        # Debug mode prevents actually running the script, but outputs the script contents
-        is_debug_mode = st.checkbox("Run in debug mode (generate scripts, but not run them)", True)
+    # with st.form("additional_consumer_form"):
+    #     warehouse_size = st.selectbox("Which version does the Provider have installed?",
+    #                                ["6.0 Native App", "5.5 Jinja", "5.5 SQL Param"])
+    #     abbreviation = st.text_input("What database abbreviation does the Provider have? (Leave blank for default)")
+    #     provider_nickname = st.selectbox("Which is the existing Provider account?",
+    #                                      st.session_state['account_nicknames'])
+    #     consumer_nickname = st.selectbox("Which is the new Consumer account?", st.session_state['account_nicknames'])
+    #     # Debug mode prevents actually running the script, but outputs the script contents
+    #     is_debug_mode = st.checkbox("Run in debug mode (generate scripts, but not run them)", True)
 
-        # Get accounts from session_state
-        provider_index = st.session_state['account_nicknames'].index(provider_nickname)
-        provider_account = st.session_state['accounts'][provider_index]
-        consumer_index = st.session_state['account_nicknames'].index(consumer_nickname)
-        consumer_account = st.session_state['accounts'][consumer_index]
+    #     # Get accounts from session_state
+    #     provider_index = st.session_state['account_nicknames'].index(provider_nickname)
+    #     provider_account = st.session_state['accounts'][provider_index]
+    #     consumer_index = st.session_state['account_nicknames'].index(consumer_nickname)
+    #     consumer_account = st.session_state['accounts'][consumer_index]
 
-        submitted = st.form_submit_button("Add Consumer")
+    #     submitted = st.form_submit_button("Add Consumer")
 
-        if submitted:
-            if provider_account == consumer_account:
-                st.error("Provider and consumer cannot be the same account!")
-            else:
-                # Establish connections, if necessary
-                if is_debug_mode:
-                    provider_conn = None
-                    consumer_conn = None
-                else:
-                    provider_conn = sfc.init_connection("account_" + str(provider_index + 1))
-                    consumer_conn = sfc.init_connection("account_" + str(consumer_index + 1))
+    #     if submitted:
+    #         if provider_account == consumer_account:
+    #             st.error("Provider and consumer cannot be the same account!")
+    #         else:
+    #             # Establish connections, if necessary
+    #             if is_debug_mode:
+    #                 provider_conn = None
+    #                 consumer_conn = None
+    #             else:
+    #                 provider_conn = sfc.init_connection("account_" + str(provider_index + 1))
+    #                 consumer_conn = sfc.init_connection("account_" + str(consumer_index + 1))
 
-                if warehouse_size == "6.0 Native App":
-                    if st.secrets["local_dcr_v6_path"] == "":
-                        path = os.getcwd() + "/data-clean-room-tng/"
-                    else:
-                        path = st.secrets["local_dcr_v6_path"]
-                elif warehouse_size == "5.5 Jinja" or warehouse_size == "5.5 SQL Param":
-                    if st.secrets["local_dcr_v55_path"] == "":
-                        path = os.getcwd() + "/data-clean-room/"
-                    else:
-                        path = st.secrets["local_dcr_v55_path"]
+    #             if warehouse_size == "6.0 Native App":
+    #                 if st.secrets["local_dcr_v6_path"] == "":
+    #                     path = os.getcwd() + "/data-clean-room-tng/"
+    #                 else:
+    #                     path = st.secrets["local_dcr_v6_path"]
+    #             elif warehouse_size == "5.5 Jinja" or warehouse_size == "5.5 SQL Param":
+    #                 if st.secrets["local_dcr_v55_path"] == "":
+    #                     path = os.getcwd() + "/data-clean-room/"
+    #                 else:
+    #                     path = st.secrets["local_dcr_v55_path"]
 
-                with st.spinner("Adding Consumer..."):
-                    snowRunner.prepare_consumer_addition(is_debug_mode, warehouse_size, provider_account,
-                                                              provider_conn, consumer_account, consumer_conn,
-                                                              abbreviation, path)
-                    snowRunner.execute_locally()
+    #             with st.spinner("Adding Consumer..."):
+    #                 snowRunner.prepare_consumer_addition(is_debug_mode, warehouse_size, provider_account,
+    #                                                           provider_conn, consumer_account, consumer_conn,
+    #                                                           abbreviation, path)
+    #                 snowRunner.execute_locally()
 
-                # Message dependent on debug or not
-                if is_debug_mode:
-                    st.success("Scripts Generated in Output!")
-                else:
-                    st.success("Consumer Added!")
-                st.snow()
+    #             # Message dependent on debug or not
+    #             if is_debug_mode:
+    #                 st.success("Scripts Generated in Output!")
+    #             else:
+    #                 st.success("Consumer Added!")
+    #             st.snow()
 
 elif action == "Add Add'l Provider ☃️":
     # Form for adding providers

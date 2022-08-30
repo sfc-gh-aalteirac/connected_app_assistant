@@ -19,6 +19,7 @@ class SnowflakeRunner:
         self.path = None
         self.script_list = None
         self.script_conn_list = None
+        self.script_path = None
         self.check_words = None
         self.replace_words = None
 
@@ -37,7 +38,7 @@ class SnowflakeRunner:
             # Prepare scripts
             comment_code_regex = re.compile(r"(?<!:)//.*")
             retScript=""
-            r = requests.get('https://raw.githubusercontent.com/sfc-gh-aalteirac/connected_app_assistant/main/sql_scripts/script_1.sql')
+            r = requests.get(self.script_path)
             for line in r.text.splitlines():
                 for check, replace in zip(self.check_words, self.replace_words):
                     line = line.replace(check, replace)
@@ -82,13 +83,14 @@ class SnowflakeRunner:
             #         retScript+= open(prepared_script, "r", encoding='utf-8').read()
             #         print("Debug mode: File generated but not run for " + current_script)
             return retScript
-    def prepare_deployment(self,is_debug_mode,path,partner_name,account_name,warehouse_size):
+    def prepare_deployment(self,is_debug_mode,path,partner_name,account_name,warehouse_size,script_path):
         script_list = ["script_1", "script_2"]
         check_words = ["<your_name>","<warehouse_size>"]
         replace_words = [partner_name,warehouse_size]
 
         self.is_debug_mode = is_debug_mode
         self.path = path
+        self.script_path=script_path
         self.script_list = script_list
         self.check_words = check_words
         self.replace_words = replace_words
