@@ -1,0 +1,5 @@
+streamlit==1.12.0
+pyarrow
+snowflake-connector-python
+pandas
+cryptography

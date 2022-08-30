@@ -1,0 +1,9 @@
+[submodule "data-clean-room"]
+	path = data-clean-room
+	url = https://github.com/snowflakecorp/data-clean-room
+[submodule "data-clean-room-tng"]
+	path = data-clean-room-tng
+	url = https://github.com/snowflakecorp/data-clean-room-tng
+[submodule "identity_resolution_native_apps"]
+	path = identity_resolution_native_apps
+	url = https://github.com/snowflakecorp/identity_resolution_native_apps
