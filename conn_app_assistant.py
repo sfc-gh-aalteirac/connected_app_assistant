@@ -2,6 +2,7 @@ import streamlit as st
 import snowflake_conn as sfc
 import snowflakeRunner as dcr
 import os
+import time
 
 # Page settings
 st.set_page_config(
@@ -95,7 +96,8 @@ if action == "First Installation":
 
             path = os.getcwd() + "/sql_scripts/"
             
-            with st.spinner("Deploying Clean Room..."):
+            with st.spinner("Generating Scripts..."):
+                time.sleep(1)
                 snowRunner.prepare_deployment(is_debug_mode,path,partner_name,account_name,warehouse_size,script_path)
                 retScript=snowRunner.execute_locally()
 
