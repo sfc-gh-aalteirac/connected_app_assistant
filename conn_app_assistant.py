@@ -74,7 +74,8 @@ if action == "First Installation":
         # warehouse_name = st.text_input("Warehouse Name")
         warehouse_size = st.selectbox("Warehouse Size?",
                                    ["XS", "S", "Medium","Large","X-Large", "2X-Large","3X-Large","4X-Large"])  # , "ID Resolution Native App"])
-        script_path=st.selectbox("Script Template",["https://raw.githubusercontent.com/sfc-gh-aalteirac/connected_app_assistant/main/sql_scripts/script_1.sql"])
+        script_path=st.selectbox("Script Template",["https://raw.githubusercontent.com/sfc-gh-aalteirac/connected_app_assistant/main/sql_scripts/script_1.sql",
+                                                    "https://raw.githubusercontent.com/sfc-gh-aalteirac/connected_app_assistant/main/sql_scripts/script_2.sql"])
         # role_name = st.text_input("Role Name")  
         # user_name = st.text_input("User Name")  
 
