@@ -103,7 +103,7 @@ if action == "First Installation":
             if is_debug_mode:
                 st.success("Scripts Generated!")
             else:
-                st.success("Clean Room Deployed!")
+                st.success("App Deployed! (not yet...)")
             st.snow()
             st.text_area("Script Preview:",retScript,disabled=True, height=300)
 
