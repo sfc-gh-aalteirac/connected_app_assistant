@@ -56,12 +56,12 @@ class SnowflakeRunner:
                             fout.write(line)
                 if not self.is_debug_mode:
                     print("Running statements for " + current_script)
-                    with open(prepared_script, "r", encoding='utf-8') as fout:
-                        # Run script
-                        for cur in script_conn.execute_stream(fout, remove_comments=True):
-                            print(cur.query)
-                            for ret in cur:
-                                print(ret)            
+                    # with open(prepared_script, "r", encoding='utf-8') as fout:
+                    #     # Run script
+                    #     for cur in script_conn.execute_stream(fout, remove_comments=True):
+                    #         print(cur.query)
+                    #         for ret in cur:
+                    #             print(ret)            
                 else:
                     retScript+= open(prepared_script, "r", encoding='utf-8').read()
                     print("Debug mode: File generated but not run for " + current_script)
