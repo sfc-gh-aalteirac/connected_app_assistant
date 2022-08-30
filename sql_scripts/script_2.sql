@@ -1,4 +1,4 @@
-//OTHER SCRIPT
+/***************OTHER SCRIPT***************/
 SET PARTNER_NAME = '<your_name>';
 SET DATABASE_NAME = '<your_name>_DB';
 SET SCHEMA_NAME = $DATABASE_NAME || '.PUBLIC';
