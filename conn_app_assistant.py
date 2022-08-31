@@ -43,7 +43,6 @@ st.sidebar.markdown("***")
 snowRunner = dcr.SnowflakeRunner()
 
 
-# Build form based on selected action
 if action == "First Installation":  
     varDict={}    
     st.subheader("First Installation")
@@ -79,7 +78,7 @@ if action == "First Installation":
             else:
                 result_badge=st.success("App Deployed! (not yet...)")
             script_area.text_area("Script Preview:",retScript,disabled=True, height=300)
-
+            st.snow()
 elif action == "Maintenance":
     st.subheader("Maintenance")
 
