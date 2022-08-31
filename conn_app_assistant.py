@@ -1,8 +1,10 @@
+from tkinter.messagebox import NO
 import streamlit as st
 import snowflake_conn as sfc
 import snowflakeRunner as dcr
 import os
 import time
+import re
 
 # Page settings
 st.set_page_config(
@@ -16,6 +18,11 @@ st.set_page_config(
     #     'About': "This app helps deploy and manage Connected Application!"
     # }
 )
+
+
+with open('./sql_scripts/script_1.sql', "r", encoding='utf-8') as fin:
+    rawsc=fin.read()
+    x=re.findall(r'<(.*?)>',rawsc)
 
 # Set up main page
 col1, col2 = st.columns((6, 1))
@@ -36,38 +43,21 @@ with sdcol3:
 st.sidebar.markdown("***")
 action = st.sidebar.radio("What action would you like to take?", ("First Installation", "Maintenance"))
 st.sidebar.markdown("***")
-# Get list of accounts
-accounts = []
-account_nicknames = []
-accounts_count = 1
-while "account_" + str(accounts_count) in st.secrets:
-    account = st.secrets["account_" + str(accounts_count)]["account"].upper()
-    nickname = st.secrets["account_" + str(accounts_count)]["nickname"].upper() + " - " + account
-    if account != "":
-        accounts.append(account)
-        account_nicknames.append(nickname)
-    accounts_count += 1
 
-# Store accounts in session state
-st.session_state['accounts'] = accounts
-st.session_state['account_nicknames'] = account_nicknames
+# st.session_state['accounts'] = accounts
+# st.session_state['account_nicknames'] = account_nicknames
 
-# Create dcr object
 snowRunner = dcr.SnowflakeRunner()
 
-# SET PARTNER_NAME = '<your_name>';
-# SET DATABASE_NAME = $PARTNER_NAME || '_DB';
-# SET SCHEMA_NAME = $DATABASE_NAME || '.PUBLIC';
-# SET WAREHOUSE_NAME = $PARTNER_NAME || '_WH';
-# SET WAREHOUSE_SIZE = 'MEDIUM';
-# SET ROLE_NAME = $PARTNER_NAME || '_RL';
-# SET USER_NAME = $PARTNER_NAME || '_USER';
-
 # Build form based on selected action
-if action == "First Installation":
+if action == "First Installation":  
+    
+    varDict={}    
     # Form for initial deployment
     st.subheader("First Installation")
     with st.form("initial_deployment_form"):
+        for key in x:
+            varDict[key]=st.text_input(key)
         partner_name = st.text_input("Partner Name",value="ALTEIRAC_INC",disabled=True)
         account_name = st.text_input("Target Account ID",value="KL98766")
         # db_name = st.text_input("Database Name")
@@ -85,6 +75,10 @@ if action == "First Installation":
         submitted = st.form_submit_button("Deploy")
 
         if submitted:
+            for key in x:
+                print(varDict[key])
+            result_badge = st.empty()
+            script_area= st.empty()
             # Establish connections, if necessary
             # if is_debug_mode:
             #     provider_conn = None
@@ -97,17 +91,17 @@ if action == "First Installation":
             path = os.getcwd() + "/sql_scripts/"
             
             with st.spinner("Generating Scripts..."):
-                time.sleep(1)
+                time.sleep(2)
                 snowRunner.prepare_deployment(is_debug_mode,path,partner_name,account_name,warehouse_size,script_path)
                 retScript=snowRunner.execute_locally()
 
             # Message dependent on debug or not
             if is_debug_mode:
-                st.success("Scripts Generated!")
+                result_badge.success("Scripts Generated!")
             else:
-                st.success("App Deployed! (not yet...)")
+                result_badge=st.success("App Deployed! (not yet...)")
             st.snow()
-            st.text_area("Script Preview:",retScript,disabled=True, height=300)
+            script_area.text_area("Script Preview:",retScript,disabled=True, height=300)
 
 elif action == "Maintenance":
     # Form for adding consumers
