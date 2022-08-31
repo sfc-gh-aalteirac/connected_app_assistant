@@ -19,7 +19,7 @@ st.set_page_config(
 )
 
 
-with open('./sql_scripts/script_1.sql', "r", encoding='utf-8') as fin:
+with open('./sql_scripts/script_2.sql', "r", encoding='utf-8') as fin:
     rawsc=fin.read()
     x=re.findall(r'<(.*?)>',rawsc)
 
@@ -57,44 +57,24 @@ if action == "First Installation":
     with st.form("initial_deployment_form"):
         for key in x:
             varDict[key]=st.text_input(key)
-        partner_name = st.text_input("Partner Name",value="ALTEIRAC_INC",disabled=True)
-        account_name = st.text_input("Target Account ID",value="KL98766")
-        # db_name = st.text_input("Database Name")
-        # schema_name = st.text_input("Schema Name")
-        # warehouse_name = st.text_input("Warehouse Name")
-        warehouse_size = st.selectbox("Warehouse Size?",
-                                   ["XS", "S", "Medium","Large","X-Large", "2X-Large","3X-Large","4X-Large"])  # , "ID Resolution Native App"])
+
+        # warehouse_size = st.selectbox("Warehouse Size?",
+        #                            ["XS", "S", "Medium","Large","X-Large", "2X-Large","3X-Large","4X-Large"])  # , "ID Resolution Native App"])
         script_path=st.selectbox("Script Template",["https://raw.githubusercontent.com/sfc-gh-aalteirac/connected_app_assistant/main/sql_scripts/script_1.sql",
                                                     "https://raw.githubusercontent.com/sfc-gh-aalteirac/connected_app_assistant/main/sql_scripts/script_2.sql"])
-        # role_name = st.text_input("Role Name")  
-        # user_name = st.text_input("User Name")  
 
         is_debug_mode = st.checkbox("Preview mode (generate scripts, but not run them)", True)
 
         submitted = st.form_submit_button("Deploy")
 
         if submitted:
-            for key in x:
-                print(varDict[key])
             result_badge = st.empty()
             script_area= st.empty()
-            # Establish connections, if necessary
-            # if is_debug_mode:
-            #     provider_conn = None
-            #     consumer_conn = None
-            # else:
-            #     provider_conn = sfc.init_connection("account_" + str(provider_index + 1))
-            #     consumer_conn = sfc.init_connection("account_" + str(consumer_index + 1))
-
-
             path = os.getcwd() + "/sql_scripts/"
-            
             with st.spinner("Generating Scripts..."):
                 time.sleep(2)
-                snowRunner.prepare_deployment(is_debug_mode,path,partner_name,account_name,warehouse_size,script_path)
+                snowRunner.prepare_deployment(is_debug_mode,varDict,script_path)
                 retScript=snowRunner.execute_locally()
-
-            # Message dependent on debug or not
             if is_debug_mode:
                 result_badge.success("Scripts Generated!")
             else:
