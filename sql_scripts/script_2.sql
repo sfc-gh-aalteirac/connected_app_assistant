@@ -1,4 +1,5 @@
 SET INFO_DYNAMIC = '<Information>';
+SET ACCOUNT_NAME = '<Account Name>';
 SET COMMENT = '<Comments>';
 SET WAREHOUSE_SIZE = '<Warehouse Size#XS,S,Medium,Large,X-Large,2X-Large,3X-Large,4X-Large>';
 SET ANYVAR = '<A Variable>';
