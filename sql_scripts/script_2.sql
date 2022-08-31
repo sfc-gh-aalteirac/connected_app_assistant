@@ -1,8 +1,7 @@
-/***************OTHER SCRIPT***************/
-SET PARTNER_NAME = '<your_name>';
-SET DATABASE_NAME = '<your_name>_DB';
+SET PARTNER_NAME = '<Partner Name>';
+SET DATABASE_NAME = $PARTNER_NAME || ''<your_name>'_DB';
 SET SCHEMA_NAME = $DATABASE_NAME || '.PUBLIC';
-SET WAREHOUSE_NAME = '<your_name>_WH';
+SET WAREHOUSE_NAME = $PARTNER_NAME || '_WH';
 SET WAREHOUSE_SIZE = '<warehouse_size>';
-SET ROLE_NAME = '<your_name>_RL';
-SET USER_NAME = '<your_name>_USER';
+SET ROLE_NAME = $PARTNER_NAME || '_RL';
+SET USER_NAME = $PARTNER_NAME || '_USER';
