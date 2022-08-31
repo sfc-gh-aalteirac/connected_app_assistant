@@ -58,8 +58,9 @@ if action == "First Installation":
             if '#' in key:
                 lst=key.split("#")[1].split(",")
                 lbl=key.split("#")[0]
-                varDict[lbl]=st.text_input(lbl,value='***'+lbl+'***')
-            varDict[key]=st.text_input(key,value='***'+key+'***')
+                varDict[lbl]=st.selectbox(lbl,lst)
+            else:    
+                varDict[key]=st.text_input(key,value='***'+key+'***')
         # warehouse_size = st.selectbox("Warehouse Size?",
         #                            ["XS", "S", "Medium","Large","X-Large", "2X-Large","3X-Large","4X-Large"])  # , "ID Resolution Native App"])
 
