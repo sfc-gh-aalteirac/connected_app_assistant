@@ -47,12 +47,16 @@ snowRunner = dcr.SnowflakeRunner()
 if action == "First Installation":  
     varDict={}    
     st.subheader("First Installation")
+    st.write("Simple application to generate a script based on parameterized templates. The form captures application specifics for customers and generate the installation script ready to run.")
+    st.write("Templates are parameterized with that format '<My Variable>', you can also define possible values with list: <My List#1,2,3>")
+    st.markdown("***")
     script_path=st.selectbox("Script Template",["https://raw.githubusercontent.com/sfc-gh-aalteirac/connected_app_assistant/main/sql_scripts/script_1.sql",
                                             "https://raw.githubusercontent.com/sfc-gh-aalteirac/connected_app_assistant/main/sql_scripts/script_2.sql"])
     rawsc = requests.get(script_path).text
     expander = st.expander("See Script Template...")
     script_mod=expander.text_area("",rawsc,disabled=False, height=len(rawsc.splitlines()*25))
     x=re.findall(r'<(.*?)>',script_mod)
+    st.write("Generated Form:")
     with st.form("initial_deployment_form"):    
         for key in x:
             if '#' in key:
@@ -60,7 +64,7 @@ if action == "First Installation":
                 lbl=key.split("#")[0]
                 varDict[key]=st.selectbox(lbl,lst)
             else:    
-                varDict[key]=st.text_input(key,value='***'+key+'***')
+                varDict[key]=st.text_input(key,placeholder='***'+key+'***')
         is_debug_mode = st.checkbox("Preview mode (generate scripts, but not run them)", True)
         submitted = st.form_submit_button("Deploy")
         if submitted:
