@@ -58,7 +58,7 @@ if action == "First Installation":
             if '#' in key:
                 lst=key.split("#")[1].split(",")
                 lbl=key.split("#")[0]
-                varDict[lbl]=st.selectbox(lbl,lst)
+                varDict[key]=st.selectbox(lbl,lst)
             else:    
                 varDict[key]=st.text_input(key,value='***'+key+'***')
         # warehouse_size = st.selectbox("Warehouse Size?",
@@ -71,14 +71,13 @@ if action == "First Installation":
             script_area= st.empty()
             path = os.getcwd() + "/sql_scripts/"
             with st.spinner("Generating Scripts..."):
-                time.sleep(2)
+                time.sleep(1)
                 snowRunner.prepare_deployment(is_debug_mode,varDict,script_path)
                 retScript=snowRunner.execute_locally()
             if is_debug_mode:
                 result_badge.success("Scripts Generated!")
             else:
                 result_badge=st.success("App Deployed! (not yet...)")
-            st.snow()
             script_area.text_area("Script Preview:",retScript,disabled=True, height=300)
 
 elif action == "Maintenance":
