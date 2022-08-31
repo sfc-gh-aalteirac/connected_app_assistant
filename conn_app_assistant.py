@@ -51,9 +51,15 @@ if action == "First Installation":
                                                     "https://raw.githubusercontent.com/sfc-gh-aalteirac/connected_app_assistant/main/sql_scripts/script_2.sql"])
     rawsc = requests.get(script_path).text
     x=re.findall(r'<(.*?)>',rawsc)
+    expander = st.expander("See Script Template...")
+    expander.text_area("Script Source:",rawsc,disabled=True, height=len(rawsc.splitlines()*25))
     with st.form("initial_deployment_form"):
         for key in x:
-            varDict[key]=st.text_input(key)
+            if '#' in key:
+                lst=key.split("#")[1].split(",")
+                lbl=key.split("#")[0]
+                varDict[lbl]=st.text_input(lbl,value='***'+lbl+'***')
+            varDict[key]=st.text_input(key,value='***'+key+'***')
         # warehouse_size = st.selectbox("Warehouse Size?",
         #                            ["XS", "S", "Medium","Large","X-Large", "2X-Large","3X-Large","4X-Large"])  # , "ID Resolution Native App"])
 
