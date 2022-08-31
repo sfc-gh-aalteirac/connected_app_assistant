@@ -1,4 +1,3 @@
-from tkinter.messagebox import NO
 import streamlit as st
 import snowflake_conn as sfc
 import snowflakeRunner as dcr
