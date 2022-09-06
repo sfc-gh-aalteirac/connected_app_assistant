@@ -48,13 +48,13 @@ with sdcol3:
 
 
 st.sidebar.markdown("***")
-action = st.sidebar.radio("What action would you like to take?", ("Snowflake Account","First Installation", "Maintenance"))
+action = st.sidebar.radio("What action would you like to take?", ("Setup Snowflake Account","First Installation", "Maintenance"))
 st.sidebar.markdown("***")
 
 snowRunner = sfc.SnowflakeRunner()
 
 
-if action == "Snowflake Account": 
+if action == "Setup Snowflake Account": 
     st.subheader("Snowflake Account Informations")
 
     with st.form("acc"): 
@@ -77,11 +77,11 @@ if action == "Snowflake Account":
                 st.session_state.snow_session=snowconn
             else:
                 result_badge.error("Something goes wrong... " + snowconn)
-    expire=datetime.datetime(year=2028, month=2, day=2)    
-    cookie_manager.set('acc', acc,key="acc",expires_at=expire) 
-    cookie_manager.set('usr', usr,key="usr",expires_at=expire) 
-    cookie_manager.set('passw', passw,key="passw",expires_at=expire)  
-    cookie_manager.set('ware', ware,key="ware",expires_at=expire)      
+            expire=datetime.datetime(year=2028, month=2, day=2)    
+            cookie_manager.set('acc', acc,key="acc",expires_at=expire) 
+            cookie_manager.set('usr', usr,key="usr",expires_at=expire) 
+            cookie_manager.set('passw', passw,key="passw",expires_at=expire)  
+            cookie_manager.set('ware', ware,key="ware",expires_at=expire)      
                    
 if action == "First Installation":  
     print(st.session_state.snow_session)
