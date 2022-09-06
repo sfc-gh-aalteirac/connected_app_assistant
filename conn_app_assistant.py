@@ -1,11 +1,13 @@
 import streamlit as st
 import snowflake_conn as sfc
-import snowflakeRunner as dcr
+import snowflakeRunner as sfc
+import snowflake_conn as sf_con
 import os
 import time
 import re
 import requests
-
+import extra_streamlit_components as stx
+import datetime
 
 st.set_page_config(
     page_title="Connected App Assistant",
@@ -14,7 +16,21 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+st.cache(allow_output_mutation=True)
+def get_manager():
+    return stx.CookieManager()
 
+def getCookies(key):
+    ret=None
+    try:
+        ret=cookie_manager.get(cookie=key)
+    except Exception as ex:
+       ret= None
+    return ret   
+
+
+
+cookie_manager = get_manager()
 
 col1, col2 = st.columns((6, 1))
 col1.title("⚙️ Connected App Assistant")
@@ -32,13 +48,43 @@ with sdcol3:
 
 
 st.sidebar.markdown("***")
-action = st.sidebar.radio("What action would you like to take?", ("First Installation", "Maintenance"))
+action = st.sidebar.radio("What action would you like to take?", ("Snowflake Account","First Installation", "Maintenance"))
 st.sidebar.markdown("***")
 
-snowRunner = dcr.SnowflakeRunner()
+snowRunner = sfc.SnowflakeRunner()
 
 
+if action == "Snowflake Account": 
+    st.subheader("Snowflake Account Informations")
+
+    with st.form("acc"): 
+        if getCookies("acc") is None: acc=st.text_input("Account",placeholder='***Account ID***') 
+        else: acc=st.text_input("Account",value=getCookies("acc"))
+        if getCookies("usr") is None: usr=st.text_input("User",placeholder='***User Name***') 
+        else: usr=st.text_input("User",value=getCookies("usr"))
+        if getCookies("passw") is None: passw=st.text_input("Password",placeholder='***Password***',)
+        else: passw=st.text_input("Password",value=getCookies("passw"),type="password")
+        if getCookies("ware") is None: ware=st.text_input("Warehouse",placeholder='***Warehouse***')
+        else: ware=st.text_input("Warehouse",value=getCookies("ware"))
+        
+        valid=st.form_submit_button("Validate")
+        result_badge = st.empty()
+        if valid:
+            snowconn = sf_con.init_connection({"user":usr,"password":passw,"account":acc,"warehouse":ware})
+
+            if type(snowconn) is not str:
+                result_badge.success("Connected!" )
+                st.session_state.snow_session=snowconn
+            else:
+                result_badge.error("Something goes wrong... " + snowconn)
+    expire=datetime.datetime(year=2028, month=2, day=2)    
+    cookie_manager.set('acc', acc,key="acc",expires_at=expire) 
+    cookie_manager.set('usr', usr,key="usr",expires_at=expire) 
+    cookie_manager.set('passw', passw,key="passw",expires_at=expire)  
+    cookie_manager.set('ware', ware,key="ware",expires_at=expire)      
+                   
 if action == "First Installation":  
+    print(st.session_state.snow_session)
     varDict={}    
     st.subheader("First Installation")
     st.write("Simple application to generate a script based on parameterized templates. The form captures application specifics for customers and generate the installation script ready to run.")
@@ -76,3 +122,6 @@ if action == "First Installation":
             st.snow()
 elif action == "Maintenance":
     st.subheader("Maintenance")
+
+
+ 
