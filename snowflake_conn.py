@@ -12,3 +12,4 @@ def init_connection(cred):
     except Exception as ex:
         return f"Some error you don't know how to handle {ex}"
 
+
