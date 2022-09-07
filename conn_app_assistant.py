@@ -19,6 +19,7 @@ st.set_page_config(
 st.cache(allow_output_mutation=True)
 def get_manager():
     return stx.CookieManager()
+cookie_manager = get_manager()
 
 def getCookies(key):
     ret=None
@@ -28,9 +29,16 @@ def getCookies(key):
        ret= None
     return ret   
 
+def setCookies(bool):
+    if bool==False:
+        return
+    expire=datetime.datetime(year=2028, month=2, day=2)  
+    with st.empty():  
+        cookie_manager.set('acc', acc,key="acc",expires_at=expire) 
+        cookie_manager.set('usr', usr,key="usr",expires_at=expire) 
+        cookie_manager.set('passw', passw,key="passw",expires_at=expire)  
+        cookie_manager.set('ware', ware,key="ware",expires_at=expire)    
 
-
-cookie_manager = get_manager()
 
 col1, col2 = st.columns((6, 1))
 col1.title("⚙️ Connected App Assistant")
@@ -64,24 +72,34 @@ if action == "Setup Snowflake Account":
         else: usr=st.text_input("User",value=getCookies("usr"))
         if getCookies("passw") is None: passw=st.text_input("Password",placeholder='***Password***',)
         else: passw=st.text_input("Password",value=getCookies("passw"),type="password")
-        if getCookies("ware") is None: ware=st.text_input("Warehouse",placeholder='***Warehouse***')
-        else: ware=st.text_input("Warehouse",value=getCookies("ware"))
-        
+
+        if getCookies("ware") is None: ware=""
+        else: ware=getCookies("ware")
+        lst=[ware]
+        wh=st.empty()
+        wh.selectbox("warehouse",lst,disabled=True)  
         valid=st.form_submit_button("Validate")
         result_badge = st.empty()
         if valid:
-            snowconn = sf_con.init_connection({"user":usr,"password":passw,"account":acc,"warehouse":ware})
-
+            lst=[]
+            snowconn = sf_con.init_connection({"user":usr,"password":passw,"account":acc})
+            cur = snowconn.cursor()
+            cur.execute('SHOW WAREHOUSES')
+            
+            for (name) in cur:
+                lst.append(name[0])
+            cur.close() 
+            if(ware!=""):
+                dd=wh.selectbox("warehouse",lst,index=lst.index(ware),on_change=setCookies(False)) 
+            else: dd=wh.selectbox("warehouse",lst,on_change=setCookies(False))
+            ware=dd
+            wh.options=lst 
             if type(snowconn) is not str:
                 result_badge.success("Connected!" )
                 st.session_state.snow_session=snowconn
             else:
-                result_badge.error("Something goes wrong... " + snowconn)
-    expire=datetime.datetime(year=2028, month=2, day=2)    
-    cookie_manager.set('acc', acc,key="acc",expires_at=expire) 
-    cookie_manager.set('usr', usr,key="usr",expires_at=expire) 
-    cookie_manager.set('passw', passw,key="passw",expires_at=expire)  
-    cookie_manager.set('ware', ware,key="ware",expires_at=expire)      
+                result_badge.error("Something goes wrong... " + snowconn)  
+            setCookies(True)    
                    
 if action == "First Installation":  
     print(st.session_state.snow_session)
