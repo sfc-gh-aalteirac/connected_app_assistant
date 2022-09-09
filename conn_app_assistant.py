@@ -16,11 +16,11 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-st.cache(allow_output_mutation=True)
+@st.cache(allow_output_mutation=True)
 def get_manager():
     return stx.CookieManager()
-cookie_manager = get_manager()
 
+cookie_manager = get_manager()
 def getCookies(key):
     ret=None
     try:
@@ -29,77 +29,98 @@ def getCookies(key):
        ret= None
     return ret   
 
-def setCookies(bool):
-    if bool==False:
-        return
-    expire=datetime.datetime(year=2028, month=2, day=2)  
-    with st.empty():  
-        cookie_manager.set('acc', acc,key="acc",expires_at=expire) 
-        cookie_manager.set('usr', usr,key="usr",expires_at=expire) 
-        cookie_manager.set('passw', passw,key="passw",expires_at=expire)  
-        cookie_manager.set('ware', ware,key="ware",expires_at=expire)    
+def logout():
+    del st.session_state.connected
+    del st.session_state.snow_session
 
+def setCookies():
+    expire=datetime.datetime(year=2024, month=2, day=2)   
+    with st.empty():
+        cookie_manager.set('acc', st.session_state.account,key="acc",expires_at=expire) 
+        cookie_manager.set('usr', st.session_state.user,key="usr",expires_at=expire) 
+        cookie_manager.set('passw', st.session_state.password,key="passw",expires_at=expire)  
+        cookie_manager.set('ware', st.session_state.warehouse,key="ware",expires_at=expire) 
 
-col1, col2 = st.columns((6, 1))
-col1.title("⚙️ Connected App Assistant")
+def connect():
+    lst=[]
+    if 'connected' not in st.session_state or st.session_state.connected==0:
+        snowconn = sf_con.init_connection({"user":st.session_state.user,"password":st.session_state.password,"account":st.session_state.account})
+        st.session_state.snow_session=snowconn  
+    if type(st.session_state.snow_session) is not str:
+        st.session_state.connected=1
+    else:
+        st.session_state.error="Something goes wrong... " + st.session_state.snow_session
+        st.session_state.connected=0
+        return    
+    cur = st.session_state.snow_session.cursor()
+    cur.execute('SHOW WAREHOUSES')
+    for (name) in cur:
+        lst.append(name[0])
+    cur.close() 
+    st.session_state.list_ware=lst
+    # setCookies()
+    # st.stop()
 
-sdcol1, sdcol2, sdcol3 = st.sidebar.columns([3,6,1])
+def initLayout():
+    col1, col2 = st.columns((6, 1))
+    col1.title("⚙️ Connected App Assistant")
+    sdcol1, sdcol2, sdcol3 = st.sidebar.columns([3,6,1])
+    with sdcol1:
+        st.write("")
+    with sdcol2:
+        st.image("assets/snow.png",width=100)
+    with sdcol3:
+        st.write("")
+    st.sidebar.markdown("***")
+    global action
+    action = st.sidebar.radio("What action would you like to take?", ("Setup Snowflake Account","First Installation", "Maintenance"))
+    st.sidebar.markdown("***")
 
-with sdcol1:
-    st.write("")
-
-with sdcol2:
-    st.image("assets/snow.png",width=100)
-
-with sdcol3:
-    st.write("")
-
-
-st.sidebar.markdown("***")
-action = st.sidebar.radio("What action would you like to take?", ("Setup Snowflake Account","First Installation", "Maintenance"))
-st.sidebar.markdown("***")
-
+initLayout()
 snowRunner = sfc.SnowflakeRunner()
 
+def populateForm(disabled):
+    global ware, result_badge
+    if getCookies("acc") is None: st.session_state.account=st.text_input("Account",placeholder='***Account ID***',disabled=disabled) 
+    else: st.session_state.account=st.text_input("Account",value=getCookies("acc"),disabled=disabled)
+    if getCookies("usr") is None: st.session_state.user=st.text_input("User",placeholder='***User Name***',disabled=disabled) 
+    else: st.session_state.user=st.text_input("User",value=getCookies("usr"),disabled=disabled)
+    if getCookies("passw") is None: st.session_state.password=st.text_input("Password",placeholder='***Password***',type='password',disabled=disabled)
+    else: st.session_state.password=st.text_input("Password",value=getCookies("passw"),type="password",disabled=disabled)
+    if getCookies("ware") is None: 
+        ware=""
+    else: 
+        ware=getCookies("ware")
+    st.session_state.warehouse=ware
+    
 
 if action == "Setup Snowflake Account": 
     st.subheader("Snowflake Account Informations")
-
-    with st.form("acc"): 
-        if getCookies("acc") is None: acc=st.text_input("Account",placeholder='***Account ID***') 
-        else: acc=st.text_input("Account",value=getCookies("acc"))
-        if getCookies("usr") is None: usr=st.text_input("User",placeholder='***User Name***') 
-        else: usr=st.text_input("User",value=getCookies("usr"))
-        if getCookies("passw") is None: passw=st.text_input("Password",placeholder='***Password***',)
-        else: passw=st.text_input("Password",value=getCookies("passw"),type="password")
-
-        if getCookies("ware") is None: ware=""
-        else: ware=getCookies("ware")
-        lst=[ware]
+    cookie_manager.get_all()
+    print("A") 
+    if "connected" in st.session_state and st.session_state.connected==1:
+        print("B") 
+        populateForm(True)
         wh=st.empty()
-        wh.selectbox("warehouse",lst,disabled=True)  
-        valid=st.form_submit_button("Validate")
+        if(ware==""):
+            st.session_state.warehouse=wh.selectbox("warehouse",st.session_state.list_ware) 
+        else:
+            st.session_state.warehouse=wh.selectbox("warehouse",st.session_state.list_ware,index=st.session_state.list_ware.index(ware))   
+        logout=st.button("Logout",on_click=logout)
         result_badge = st.empty()
-        if valid:
-            lst=[]
-            snowconn = sf_con.init_connection({"user":usr,"password":passw,"account":acc})
-            cur = snowconn.cursor()
-            cur.execute('SHOW WAREHOUSES')
-            
-            for (name) in cur:
-                lst.append(name[0])
-            cur.close() 
-            if(ware!=""):
-                dd=wh.selectbox("warehouse",lst,index=lst.index(ware),on_change=setCookies(False)) 
-            else: dd=wh.selectbox("warehouse",lst,on_change=setCookies(False))
-            ware=dd
-            wh.options=lst 
-            if type(snowconn) is not str:
-                result_badge.success("Connected!" )
-                st.session_state.snow_session=snowconn
-            else:
-                result_badge.error("Something goes wrong... " + snowconn)  
-            setCookies(True)    
+        result_badge.success("Connected!" )
+        setCookies()
+    else:
+        populateForm(False)
+        wh=st.empty()
+        lst=[ware]
+        st.session_state.warehouse=wh.selectbox("warehouse",lst,disabled=True) 
+        if(st.session_state.get("error") is not None):
+            result_badge = st.empty()
+            result_badge.error(st.session_state.get("error"))
+            del st.session_state.error
+        valid=st.button("Connect",on_click=connect)
+               
                    
 if action == "First Installation":  
     print(st.session_state.snow_session)
