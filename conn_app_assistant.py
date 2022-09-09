@@ -106,9 +106,9 @@ if action == "Setup Snowflake Account":
             st.session_state.warehouse=wh.selectbox("warehouse",st.session_state.list_ware) 
         else:
             st.session_state.warehouse=wh.selectbox("warehouse",st.session_state.list_ware,index=st.session_state.list_ware.index(ware))   
-        logout=st.button("Logout",on_click=logout)
         result_badge = st.empty()
         result_badge.success("Connected!" )
+        logout=st.button("Logout",on_click=logout)
         setCookies()
     else:
         populateForm(False)
